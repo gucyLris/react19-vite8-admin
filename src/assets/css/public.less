@@ -1,0 +1,378 @@
+// 盒模型统一
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+// 移出默认边距和内边距
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+// 语义块级元素 display 修正
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+// 隐藏引号
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+    content: none;
+}
+
+// 列表样式清除
+ol,
+ul {
+    list-style: none;
+}
+
+// 表格样式统一
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+// 根元素全高，基准字体
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+    font-size: 16px; // 1rem = 16px
+}
+
+// 平滑滚动（可选）
+html {
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+// 全局字体与渲染
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color: #1f2937;
+    background-color: #ffffff;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// 媒体元素自适应
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+// 表单元素字体继承
+button,
+input,
+optgroup,
+select,
+textarea {
+    font: inherit;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    background: none;
+    border: none;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+}
+
+// 按钮光标
+button {
+    cursor: pointer;
+    background: none;
+}
+
+// 链接无下划线
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+// 焦点可见性（无障碍）
+:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+// 隐藏属性
+[hidden] {
+    display: none;
+}
+
+// 移除数字输入框 spinner
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+// 嵌入元素最大宽度限制
+iframe,
+embed,
+object {
+    max-width: 100%;
+}
+
+// 自定义滚动条（可选）
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+// 全尺寸铺满（常用于图表容器）
+.echarts {
+    width: 100%;
+    height: 100%;
+}
+
+// 边框基础类（统一使用 1px solid 默认灰色，可自行覆盖）
+// 全边框
+.border {
+    border: 1px solid #e5e7eb;
+}
+
+// 无边框
+.border-none {
+    border: none;
+}
+
+// 四边独立设置
+.border-t {
+    border-top: 1px solid #e5e7eb;
+}
+
+.border-b {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.border-l {
+    border-left: 1px solid #e5e7eb;
+}
+
+.border-r {
+    border-right: 1px solid #e5e7eb;
+}
+
+// 虚线边框（全边或单边）
+.border-dashed {
+    border-style: dashed;
+}
+
+.border-t-dashed {
+    border-top: 1px dashed #e5e7eb;
+}
+
+.border-b-dashed {
+    border-bottom: 1px dashed #e5e7eb;
+}
+
+.border-l-dashed {
+    border-left: 1px dashed #e5e7eb;
+}
+
+.border-r-dashed {
+    border-right: 1px dashed #e5e7eb;
+}
+
+// 无边框（优先级覆盖）
+.border-0 {
+    border: 0;
+}
+
+// 文本溢出省略号（块级 + 行内块均可用）
+.ellipsis {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// 行内块省略号（如果你一定要inline-block）
+.ellipsis-inline {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+// 小型按钮（去除 !important，提高可维护性）
+// 建议通过组件样式覆盖，如果必须全局使用，可保留如下：
+.small-btn {
+    padding: 0 10px;
+    height: 29px;
+    line-height: 29px;
+
+    span {
+        font-size: 13px;
+    }
+
+    // 如果有需要强制覆盖的场合，可在组件内用 :where(.small-btn) 提高权重
+}
+
+// 内容过渡动画（淡入淡出 + 位移）
+.content-transition {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.content-hidden {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.content-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+// 辅助工具：隐藏元素但保留占位（visibility）
+.invisible {
+    visibility: hidden;
+}
+
+// 完全隐藏且不占位
+.hidden {
+    display: none;
+}
+
+// 清除浮动
+.clearfix::after {
+    content: '';
+    display: table;
+    clear: both;
+}

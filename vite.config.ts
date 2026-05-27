@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => {
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, 'src'),
-                '@src': path.resolve(__dirname, 'src'),
-            },
+                '@src': path.resolve(__dirname, 'src')
+            }
         },
         plugins: [react()],
         server: {
@@ -26,12 +26,12 @@ export default defineConfig(({ mode }) => {
             // 减少文件监听开销
             watch: {
                 ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
-                usePolling: false,
+                usePolling: false
             },
             // HMR 优化，减少开发环境切换卡顿
             hmr: {
-                overlay: true,
-            },
-        },
+                overlay: true
+            }
+        }
     }
 })

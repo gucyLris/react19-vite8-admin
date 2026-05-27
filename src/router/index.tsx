@@ -1,21 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { Hello } from '@/components/HelloWord'
-import { List } from '@/components/List'
-import { Borad } from '@/pages/borad'
+import Layouts from '@/layouts'
 
 const routers = [
     {
         path: '/',
-        element: <Hello />,
-    },
-    {
-        path: '/list',
-        element: <List />,
-    },
-    {
-        path: '/borad',
-        element: <Borad />,
-    },
+        element: <Layouts />
+    }
 ]
 
 const router = createBrowserRouter(routers)
