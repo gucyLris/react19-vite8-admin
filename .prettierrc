@@ -16,5 +16,6 @@
                 "parser": "typescript"
             }
         }
-    ]
+    ],
+    "plugins": ["prettier-plugin-tailwindcss"]
 }

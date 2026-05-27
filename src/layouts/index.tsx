@@ -1,82 +1,22 @@
-import React, { useState } from 'react'
-import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    UploadOutlined,
-    UserOutlined,
-    VideoCameraOutlined
-} from '@ant-design/icons'
-import { Button, Layout, Menu, theme } from 'antd'
+import { memo } from 'react'
+import { Outlet } from 'react-router-dom' // 关键导入
+import Header from '@/layouts/components/Header'
+import { TreeMenu } from '@/layouts/components/TreeMenu'
 
-const { Header, Sider, Content } = Layout
-
-const App: React.FC = () => {
-    const [collapsed, setCollapsed] = useState(false)
-    const {
-        token: { colorBgContainer, borderRadiusLG }
-    } = theme.useToken()
-
+function Layout() {
     return (
-        <Layout>
-            <Sider trigger={null} collapsible collapsed={collapsed}>
-                <div className="demo-logo-vertical" />
-                <Menu
-                    theme="dark"
-                    mode="inline"
-                    defaultSelectedKeys={['1']}
-                    items={[
-                        {
-                            key: '1',
-                            icon: <UserOutlined />,
-                            label: 'nav 1'
-                        },
-                        {
-                            key: '2',
-                            icon: <VideoCameraOutlined />,
-                            label: 'nav 2'
-                        },
-                        {
-                            key: '3',
-                            icon: <UploadOutlined />,
-                            label: 'nav 3'
-                        }
-                    ]}
-                />
-            </Sider>
-            <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }}>
-                    <div className="bg-amber-900">2222</div>
-                    <Button
-                        type="text"
-                        icon={
-                            collapsed ? (
-                                <MenuUnfoldOutlined />
-                            ) : (
-                                <MenuFoldOutlined />
-                            )
-                        }
-                        onClick={() => setCollapsed(!collapsed)}
-                        style={{
-                            fontSize: '16px',
-                            width: 64,
-                            height: 64
-                        }}
-                    />
-                </Header>
-                <Content
-                    style={{
-                        margin: '24px 16px',
-                        padding: 24,
-                        minHeight: 280,
-                        background: colorBgContainer,
-                        borderRadius: borderRadiusLG
-                    }}
-                >
-                    Content
-                </Content>
-            </Layout>
-        </Layout>
+        <div className="flex h-screen w-full flex-row">
+            <div className="h-full w-60 bg-gray-200">
+                <TreeMenu />
+            </div>
+            <div className="flex flex-1 flex-col">
+                <Header />
+                <div className="flex-1 overflow-auto">
+                    <Outlet /> {/* 子路由的内容会渲染在这里 */}
+                </div>
+            </div>
+        </div>
     )
 }
 
-export default App
+export default memo(Layout)
