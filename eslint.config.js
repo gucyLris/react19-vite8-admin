@@ -27,6 +27,8 @@ export default defineConfig([
         rules: {
             // 让 Prettier 的格式问题作为 ESLint 错误显示，并自动修复（--fix 时）
             'prettier/prettier': 'error',
+            'typescript-eslint/no-explicit-any': 'off', // 允许使用 any 类型
+            'no-useless-assignment': 'off', // 关闭无用赋值检查，允许某些特定场景的赋值
         },
         languageOptions: {
             globals: globals.browser,
