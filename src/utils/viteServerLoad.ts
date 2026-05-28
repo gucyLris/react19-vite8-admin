@@ -13,8 +13,8 @@ export const loadViteServerConfig = (env: EnvConfigs) => {
                         {
                             target: target,
                             changeOrigin: true,
-                            rewrite: (path: string) => path.replace(prefix, ''), // 可选，移除前缀
-                        },
+                            rewrite: (path: string) => path.replace(prefix, '') // 可选，移除前缀
+                        }
                     ])
                 )
             }
