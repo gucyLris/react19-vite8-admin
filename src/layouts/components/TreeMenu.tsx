@@ -45,9 +45,10 @@ export const TreeMenu = () => {
             navigate(menuItem.router)
         }
     }
+
     return (
         <Menu
-            className="h-full bg-[#ffffff]!"
+            className="h-full"
             id="layout-menu"
             items={menuItems}
             mode="inline"

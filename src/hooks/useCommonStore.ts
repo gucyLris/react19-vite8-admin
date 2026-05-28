@@ -13,7 +13,12 @@ export const useCommonStore = () => {
     const publicStore = usePublicStore(
         useShallow((state) => ({
             isFullscreen: state.isFullscreen,
-            theme: state.theme
+            theme: state.theme,
+            rootBgClass:
+                state.theme === 'light' ? 'bg-[#f3f3f3]' : 'bg-[#000000]',
+            // 根据 theme 实时计算样式类
+            bgClass: state.theme === 'light' ? 'bg-white' : 'bg-[#191919]',
+            textClass: state.theme === 'light' ? 'text-black' : 'text-white'
         }))
     )
 
