@@ -12,8 +12,8 @@ export const ThemeIcon = () => {
     const setThemeValue = usePublicStore((state) => state.setThemeValue)
 
     const THEME_ICON_MAP = {
-        light: 'line-md:moon-filled-alt-loop',
-        dark: 'line-md:moon-filled-to-sunny-filled-loop-transition'
+        dark: 'line-md:moon-filled-alt-loop',
+        light: 'line-md:moon-filled-to-sunny-filled-loop-transition'
     } as const
 
     // 使用 useCallback 稳定切换函数引用
