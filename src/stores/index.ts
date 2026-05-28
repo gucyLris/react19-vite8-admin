@@ -1,3 +1,4 @@
-import { useMenuStore } from './menu'
+import { useMenuStore } from './menuStore'
+import { usePublicStore } from './publicStore'
 
-export { useMenuStore }
+export { useMenuStore, usePublicStore }

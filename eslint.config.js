@@ -1,12 +1,15 @@
 import js from '@eslint/js'
-import globals from 'globals'
+import prettierConfig from 'eslint-config-prettier'
+import prettierPlugin from 'eslint-plugin-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
-// 新增 Prettier 相关导入
-import prettierPlugin from 'eslint-plugin-prettier'
-import prettierConfig from 'eslint-config-prettier'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+// 新增：导入 simple-import-sort 插件
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
+// 如果你还没有导入 eslint-plugin-react，需要导入
+import reactPlugin from 'eslint-plugin-react'
 
 export default defineConfig([
     globalIgnores(['dist']),
@@ -17,21 +20,42 @@ export default defineConfig([
             tseslint.configs.recommended,
             reactHooks.configs.flat.recommended,
             reactRefresh.configs.vite,
-            // 注意：eslint-config-prettier 必须放在最后，以覆盖其他规则中的格式冲突
-            prettierConfig,
+            // prettier-config 必须放在最后以关闭冲突规则
+            prettierConfig
         ],
         plugins: {
-            // 注册 prettier 插件
             prettier: prettierPlugin,
+            // 注册 simple-import-sort 插件
+            'simple-import-sort': simpleImportSort,
+            // 注册 react 插件（为了 react/jsx-sort-props 规则）
+            react: reactPlugin
         },
         rules: {
             // 让 Prettier 的格式问题作为 ESLint 错误显示，并自动修复（--fix 时）
             'prettier/prettier': 'error',
-            'no-useless-assignment': 'off', // 关闭无用赋值检查，允许某些特定场景的赋值
-            '@typescript-eslint/no-explicit-any': 'off', // 关闭 TypeScript 中的 any 类型检查
+            // 关闭无用赋值检查，允许某些特定场景的赋值
+            'no-useless-assignment': 'off',
+            // 关闭 TypeScript 中的 any 类型检查
+            '@typescript-eslint/no-explicit-any': 'off',
+
+            // JSX 属性排序
+            'react/jsx-sort-props': [
+                'error',
+                {
+                    callbacksLast: true,
+                    shorthandFirst: false,
+                    ignoreCase: false,
+                    noSortAlphabetically: false,
+                    reservedFirst: true
+                }
+            ],
+
+            // import 排序
+            'simple-import-sort/imports': 'error',
+            'simple-import-sort/exports': 'error'
         },
         languageOptions: {
-            globals: globals.browser,
-        },
-    },
+            globals: globals.browser
+        }
+    }
 ])

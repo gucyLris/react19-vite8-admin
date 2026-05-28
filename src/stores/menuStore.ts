@@ -1,14 +1,15 @@
 // src/store/useMenuStore.ts
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+
 import type { MenuItem } from '@/types/menu'
 
-interface MenuStore {
+interface IMenuStore {
     menuList: MenuItem[]
     setMenuList: (list: MenuItem[]) => void
 }
 
-export const useMenuStore = create<MenuStore>()(
+export const useMenuStore = create<IMenuStore>()(
     devtools(
         (set) => ({
             menuList: [],

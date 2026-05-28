@@ -1,12 +1,14 @@
-import { useEffect, useMemo } from 'react'
 import { Menu } from 'antd'
+import { useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useShallow } from 'zustand/react/shallow'
+
+import { getMenusApi } from '@/api/modules/menus'
 import { useMenuStore } from '@/stores'
 import { findMenuItemByKey, transformMenuToAntd } from '@/utils/menuHelper'
-import { useShallow } from 'zustand/react/shallow'
-import { getMenusApi } from '@/api/modules/menus'
-import { useNavigate } from 'react-router-dom'
 
 export const TreeMenu = () => {
+    // 从 Zustand 菜单 store 中获取菜单列表和设置菜单列表的函数，使用 useShallow 进行浅比较以优化性能
     const { menuList, setMenuList } = useMenuStore(
         useShallow((state) => ({
             menuList: state.menuList,
@@ -14,6 +16,7 @@ export const TreeMenu = () => {
         }))
     )
 
+    // 组件挂载时获取菜单数据，使用 useEffect 进行副作用处理
     useEffect(() => {
         const fetchMenu = async () => {
             const res = await getMenusApi()
@@ -44,11 +47,12 @@ export const TreeMenu = () => {
     }
     return (
         <Menu
-            theme="dark"
-            mode="inline"
+            className="h-full bg-gray-800! text-white"
+            id="layout-menu"
             items={menuItems}
+            mode="inline"
+            theme="dark"
             onClick={handleMenuClick}
-            className="h-full"
         />
     )
 }
