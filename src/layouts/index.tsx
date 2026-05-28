@@ -7,7 +7,7 @@ import { useCommonStore } from '@/hooks/useCommonStore'
 import { CollapseIcon } from '@/layouts/components/CollapseIcon'
 import { FooterBar } from '@/layouts/components/FooterBar'
 import HeaderPage from '@/layouts/components/HeaderBar'
-import { NavTabMenu } from '@/layouts/components/Nav'
+import { NavBar } from '@/layouts/components/NavBar'
 import { TreeMenu } from '@/layouts/components/TreeMenu'
 const { defaultAlgorithm, darkAlgorithm } = theme // 导入 Ant Design 的主题算法
 
@@ -32,22 +32,22 @@ function LayoutPage() {
                         <Sider
                             className="flex h-full flex-col"
                             collapsedWidth={80}
-                            width={240}
+                            width={150}
                         >
                             <div className="flex h-full flex-col bg-gray-800">
                                 <div className="flex-1 overflow-y-auto">
                                     <TreeMenu />
                                 </div>
-                                <div className="shrink-0 py-2 text-center text-white">
+                                <div className="shrink-0 bg-[#ffffff] py-2 text-center text-black">
                                     <CollapseIcon />
                                 </div>
                             </div>
                         </Sider>
-                        <Content className="box-border overflow-hidden">
-                            <div className="flex h-8 items-center justify-start bg-amber-300 px-2! text-gray-500">
-                                <NavTabMenu />
+                        <Content className="box-border overflow-hidden bg-[#f3f3f3]">
+                            <div className="flex h-8 items-center justify-start px-6!">
+                                <NavBar />
                             </div>
-                            <div className="h-full bg-gray-500 p-6!">
+                            <div className="m-6! mt-0! h-[calc(100%-24px-32px)] rounded-md bg-[#ffffff] p-4! shadow-sm">
                                 <Outlet /> {/* 子路由的内容会渲染在这里 */}
                             </div>
                         </Content>

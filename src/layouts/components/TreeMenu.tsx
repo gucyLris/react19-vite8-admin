@@ -47,11 +47,11 @@ export const TreeMenu = () => {
     }
     return (
         <Menu
-            className="h-full bg-gray-800! text-white"
+            className="h-full bg-[#ffffff]!"
             id="layout-menu"
             items={menuItems}
             mode="inline"
-            theme="dark"
+            theme="light"
             onClick={handleMenuClick}
         />
     )
