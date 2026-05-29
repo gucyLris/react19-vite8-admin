@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import Layouts from '@/layouts'
 import { Dashboard } from '@/pages/dashboard'
 import { Devices } from '@/pages/devices'
+import Login from '@/pages/login'
 import { Terminal } from '@/pages/terminal'
 import { Topology } from '@/pages/topology'
 
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
             { path: 'devices', element: <Devices /> },
             { path: 'terminal', element: <Terminal /> }
         ]
+    },
+    {
+        path: 'login',
+        element: <Login />
     }
 ])
 
