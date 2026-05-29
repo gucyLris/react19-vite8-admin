@@ -14,15 +14,9 @@ import { useMemo, useState } from 'react'
 import Github from '@/components/github'
 import { ThemeIcon } from '@/components/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
+import type { ILoginFormValues } from '@/types/login'
 
 const { defaultAlgorithm, darkAlgorithm } = theme
-
-// 表单值类型
-interface LoginFormValues {
-    username: string
-    password: string
-    remember?: boolean
-}
 
 const LoginPage = () => {
     const {
@@ -31,10 +25,11 @@ const LoginPage = () => {
         textClass,
         rootBgClass
     } = useCommonStore()
-    const [form] = Form.useForm<LoginFormValues>()
+
+    const [form] = Form.useForm<ILoginFormValues>()
     const [loading, setLoading] = useState(false)
 
-    const onFinish = (values: LoginFormValues) => {
+    const onFinish = (values: ILoginFormValues) => {
         setLoading(true)
         // 模拟登录请求
         setTimeout(() => {

@@ -1,7 +1,7 @@
 import type { MenuProps } from 'antd'
 
 // 菜单项类型定义
-export interface MenuItem {
+export interface IMenuItem {
     id: number
     label: string
     labelEn: string
@@ -14,7 +14,7 @@ export interface MenuItem {
     is_visible: boolean
     created_at: string
     updated_at: string
-    children?: MenuItem[]
+    children?: IMenuItem[]
 }
 
 // Ant Design Menu 的 Item 类型

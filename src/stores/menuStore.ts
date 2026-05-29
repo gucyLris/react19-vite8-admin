@@ -2,11 +2,11 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
-import type { MenuItem } from '@/types/menu'
+import type { IMenuItem } from '@/types/menu'
 
 interface IMenuStore {
-    menuList: MenuItem[]
-    setMenuList: (list: MenuItem[]) => void
+    menuList: IMenuItem[]
+    setMenuList: (list: IMenuItem[]) => void
 }
 
 export const useMenuStore = create<IMenuStore>()(

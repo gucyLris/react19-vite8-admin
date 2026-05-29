@@ -1,7 +1,8 @@
 // src/utils/menuHelper.tsx
-import React from 'react'
 import type { MenuProps } from 'antd'
-import type { MenuItem } from '@/types/menu'
+import React from 'react'
+
+import type { IMenuItem } from '@/types/menu'
 
 type MenuItemType = NonNullable<MenuProps['items']>[number]
 
@@ -12,7 +13,7 @@ type MenuItemType = NonNullable<MenuProps['items']>[number]
  * @returns Ant Design Menu 的 items 数组
  */
 export const transformMenuToAntd = (
-    menus: MenuItem[],
+    menus: IMenuItem[],
     locale: 'zh' | 'en' = 'zh'
 ): MenuItemType[] => {
     if (!Array.isArray(menus)) return []
@@ -21,7 +22,7 @@ export const transformMenuToAntd = (
     const sorted = [...menus].sort((a, b) => a.order - b.order)
 
     // 2. 递归构建菜单项
-    const buildItems = (list: MenuItem[]): MenuItemType[] => {
+    const buildItems = (list: IMenuItem[]): MenuItemType[] => {
         const result: MenuItemType[] = []
 
         for (const item of list) {
@@ -71,9 +72,9 @@ export const transformMenuToAntd = (
  * @returns 匹配的菜单项，未找到则返回 undefined
  */
 export const findMenuItemByKey = (
-    menus: MenuItem[],
+    menus: IMenuItem[],
     key: string
-): MenuItem | undefined => {
+): IMenuItem | undefined => {
     for (const item of menus) {
         if (item.key === key) return item
         if (item.children) {
