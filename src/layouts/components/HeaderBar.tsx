@@ -1,8 +1,8 @@
-import { BannerLogo } from '@/components/BannerLogo'
-import Fullscreen from '@/components/Fullscreen'
-import Github from '@/components/Github'
-import { ThemeIcon } from '@/components/ThemeIcon'
-import { UserInfo } from '@/components/UserInfo'
+import { BannerLogo } from '@/components/bannerLogo'
+import Fullscreen from '@/components/fullscreen'
+import Github from '@/components/github'
+import { ThemeIcon } from '@/components/theme'
+import { UserInfo } from '@/components/userInfo'
 import { useCommonStore } from '@/hooks/useCommonStore'
 
 function HeaderBar() {

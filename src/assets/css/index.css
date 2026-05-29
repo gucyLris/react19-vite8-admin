@@ -1,1 +1,22 @@
 @import 'tailwindcss';
+
+/* 禁用 View Transition 默认动画 */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none !important;
+    mix-blend-mode: normal !important;
+}
+::view-transition-image-pair(root) {
+    animation: none !important;
+}
+
+/* 让 html 背景跟随主题 */
+html.theme-dark {
+    background-color: #1a1a1a; /* 您的深色背景 */
+}
+html.theme-primary {
+    background-color: #ffffff; /* 您的浅色背景 */
+}
+body {
+    background-color: transparent;
+}

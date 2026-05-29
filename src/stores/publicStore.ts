@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
-export type ThemeType = 'dark' | 'light'
+import type { ThemeType } from '@/types/theme'
 
 interface IPublicState {
     theme: ThemeType // 主题

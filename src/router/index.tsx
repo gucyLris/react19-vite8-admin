@@ -1,9 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom'
+
 import Layouts from '@/layouts'
 import { Dashboard } from '@/pages/dashboard'
-import { Topology } from '@/pages/topology'
 import { Devices } from '@/pages/devices'
 import { Terminal } from '@/pages/terminal'
+import { Topology } from '@/pages/topology'
 
 const router = createBrowserRouter([
     {

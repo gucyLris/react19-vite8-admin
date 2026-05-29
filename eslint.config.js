@@ -52,7 +52,10 @@ export default defineConfig([
 
             // import 排序
             'simple-import-sort/imports': 'error',
-            'simple-import-sort/exports': 'error'
+            'simple-import-sort/exports': 'error',
+
+            'no-debugger':
+                process.env.NODE_ENV === 'production' ? 'error' : 'off'
         },
         languageOptions: {
             globals: globals.browser
