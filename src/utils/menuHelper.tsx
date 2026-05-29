@@ -1,6 +1,4 @@
-// src/utils/menuHelper.tsx
 import type { MenuProps } from 'antd'
-import React from 'react'
 
 import type { IMenuItem } from '@/types/menu'
 
