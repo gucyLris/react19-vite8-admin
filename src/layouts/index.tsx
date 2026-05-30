@@ -3,6 +3,7 @@ import useApp from 'antd/es/app/useApp'
 import { memo, useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
+import { THEME } from '@/constants/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
 import { CollapseIcon } from '@/layouts/components/CollapseIcon'
 import { FooterBar } from '@/layouts/components/FooterBar'
@@ -42,7 +43,7 @@ function LayoutPage() {
     const themeConfig = useMemo(
         () => ({
             algorithm: [
-                currentTheme === 'dark' ? darkAlgorithm : defaultAlgorithm
+                currentTheme === THEME.DARK ? darkAlgorithm : defaultAlgorithm
             ]
         }),
         [currentTheme]

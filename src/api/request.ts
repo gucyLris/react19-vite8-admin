@@ -1,6 +1,7 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import axios, { AxiosError } from 'axios'
 
+import { ErrorCodeMessage, HttpStatusCode } from '@/constants/errorCodes'
 import { getItem, removeItem } from '@/utils/db'
 import { navigateTo } from '@/utils/historyHelper'
 import { handleErrorMsg } from '@/utils/messageHelper'
@@ -64,22 +65,24 @@ service.interceptors.response.use(
         const realData = data.data?.data
 
         // 根据业务 code 处理
-        if (realCode === 200) {
+        if (realCode === HttpStatusCode.OK) {
             // 成功：返回 data 部分，便于业务使用
             return realData
         }
 
         // 401：未授权，清除 token 并跳转登录
-        if (realCode === 401) {
+        if (realCode === HttpStatusCode.UNAUTHORIZED) {
             await removeItem('token')
             navigateTo('/login')
             return Promise.reject(new Error(realMessage || '未授权'))
         }
 
-        // 其他业务错误
+        // 业务错误码处理
         const errorMsg = realMessage || '请求失败'
-        if (custom?.showError !== false) {
-            handleErrorMsg(errorMsg)
+        if (ErrorCodeMessage[realCode]) {
+            handleErrorMsg(ErrorCodeMessage[realCode])
+        } else {
+            handleErrorMsg(realMessage || '请求失败')
         }
 
         return Promise.reject(new Error(errorMsg))

@@ -2,20 +2,22 @@ import { Icon } from '@iconify/react'
 import { Tooltip } from 'antd'
 
 import {
-    ANIMATION_DURATION,
+    THEME_ANIMATION,
     THEME_CLASS_MAP,
     THEME_ICON_MAP
 } from '@/constants/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
 import { usePublicStore } from '@/stores'
 import type { ThemeType } from '@/types/theme'
+import { setItem } from '@/utils/db'
 
 export const ThemeIcon = () => {
     const { theme } = useCommonStore()
     const setThemeValue = usePublicStore((state) => state.setThemeValue)
 
     // 纯切换逻辑（无动画）
-    const toggleThemeScheme = (nextTheme: ThemeType) => {
+    const toggleThemeScheme = async (nextTheme: ThemeType) => {
+        await setItem('theme', nextTheme)
         setThemeValue(nextTheme)
         document.body.className = THEME_CLASS_MAP[nextTheme]
     }
@@ -49,7 +51,7 @@ export const ThemeIcon = () => {
                     }
                 ],
                 {
-                    duration: ANIMATION_DURATION,
+                    duration: THEME_ANIMATION.DURATION,
                     pseudoElement: '::view-transition-new(root)'
                 }
             )
