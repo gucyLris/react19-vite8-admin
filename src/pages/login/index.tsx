@@ -37,6 +37,7 @@ const LoginPage = () => {
             const result = await postLoginApi(values)
             handleSuccessMsg('登录成功！')
             await setItem('token', result.token) // 存储到 IndexedDB
+
             navigateTo('/') // SPA 平滑导航
         } catch (error: any) {
             handleErrorMsg(error?.message, '登录失败，请重试')
