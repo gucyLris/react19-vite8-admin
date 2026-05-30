@@ -8,19 +8,39 @@ import {
     Input,
     theme
 } from 'antd'
-import { useMemo, useState } from 'react'
+import useApp from 'antd/es/app/useApp'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { postLoginApi } from '@/api/modules/login'
 import Github from '@/components/github'
 import { ThemeIcon } from '@/components/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
 import type { ILoginFormValues } from '@/types/login'
-import { navigateTo } from '@/utils/historyHelper'
-import { handleErrorMsg, handleSuccessMsg } from '@/utils/messageHelper'
+import { navigateTo, setGlobalNavigate } from '@/utils/historyHelper'
+import {
+    handleErrorMsg,
+    handleSuccessMsg,
+    setGlobalMessageInstance
+} from '@/utils/messageHelper'
 
 const { defaultAlgorithm, darkAlgorithm } = theme
 
 const LoginPage = () => {
+    // 获取全局导航和 message 实例
+    const navigate = useNavigate()
+    const { message } = useApp()
+
+    // 注入全局 navigate（供工具函数调用）
+    useEffect(() => {
+        setGlobalNavigate(navigate)
+    }, [navigate])
+
+    // 注入全局 message 实例（消除静态方法警告）
+    useEffect(() => {
+        setGlobalMessageInstance(message)
+    }, [message])
+
     const {
         theme: currentTheme,
         bgClass,
@@ -137,7 +157,6 @@ const LoginPage = () => {
                                     loading={loading}
                                     size="large"
                                     type="primary"
-                                    onClick={() => form.submit()}
                                 >
                                     登录
                                 </Button>

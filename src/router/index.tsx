@@ -1,5 +1,4 @@
-// src/router/index.tsx
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, redirect } from 'react-router-dom'
 
 import ProtectedRoute from '@/components/protectedRoute' // 引入
 import Layouts from '@/layouts'
@@ -8,7 +7,6 @@ import { Devices } from '@/pages/devices'
 import Login from '@/pages/login'
 import { Terminal } from '@/pages/terminal'
 import { Topology } from '@/pages/topology'
-import { navigateTo } from '@/utils/historyHelper'
 
 const router = createBrowserRouter([
     {
@@ -33,7 +31,7 @@ const router = createBrowserRouter([
         element: <Login />,
         loader: () => {
             if (localStorage.getItem('token')) {
-                return navigateTo('/')
+                return redirect('/')
             }
             return null
         }
