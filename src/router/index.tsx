@@ -1,7 +1,8 @@
 import { createBrowserRouter, redirect } from 'react-router-dom'
 
-import ProtectedRoute from '@/components/protectedRoute' // 引入
+import ProtectedRoute from '@/components/protectedRoute'
 import Layouts from '@/layouts'
+import { RootLayout } from '@/layouts/RootLayout'
 import { Dashboard } from '@/pages/dashboard'
 import { Devices } from '@/pages/devices'
 import Login from '@/pages/login'
@@ -11,29 +12,34 @@ import { getItem } from '@/utils/db'
 
 const router = createBrowserRouter([
     {
-        // 守卫包裹所有需要登录的路由
-        element: <ProtectedRoute />,
+        element: <RootLayout />,
         children: [
             {
-                path: '/',
-                element: <Layouts />,
+                // 守卫包裹所有需要登录的路由
+                element: <ProtectedRoute />,
                 children: [
-                    { index: true, element: <Dashboard /> },
-                    { path: 'dashboard', element: <Dashboard /> },
-                    { path: 'topology', element: <Topology /> },
-                    { path: 'devices', element: <Devices /> },
-                    { path: 'terminal', element: <Terminal /> }
+                    {
+                        path: '/',
+                        element: <Layouts />,
+                        children: [
+                            { index: true, element: <Dashboard /> },
+                            { path: 'dashboard', element: <Dashboard /> },
+                            { path: 'topology', element: <Topology /> },
+                            { path: 'devices', element: <Devices /> },
+                            { path: 'terminal', element: <Terminal /> }
+                        ]
+                    }
                 ]
+            },
+            {
+                path: 'login',
+                element: <Login />,
+                loader: async () => {
+                    const isAuth = await getItem('token')
+                    return isAuth ? redirect('/') : null
+                }
             }
         ]
-    },
-    {
-        path: 'login',
-        element: <Login />,
-        loader: async () => {
-            const isAuth = await getItem('token')
-            return isAuth ? redirect('/') : null
-        }
     }
 ])
 

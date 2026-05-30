@@ -1,7 +1,6 @@
 import { ConfigProvider, Layout, theme } from 'antd'
-import useApp from 'antd/es/app/useApp'
-import { memo, useEffect, useMemo } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { memo, useMemo } from 'react'
+import { Outlet } from 'react-router-dom'
 
 import { THEME } from '@/constants/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
@@ -10,27 +9,11 @@ import { FooterBar } from '@/layouts/components/FooterBar'
 import HeaderPage from '@/layouts/components/HeaderBar'
 import { NavBar } from '@/layouts/components/NavBar'
 import { TreeMenu } from '@/layouts/components/TreeMenu'
-import { setGlobalNavigate } from '@/utils/historyHelper'
-import { setGlobalMessageInstance } from '@/utils/messageHelper'
 
 const { defaultAlgorithm, darkAlgorithm } = theme
 
 function LayoutPage() {
     const { Sider, Content } = Layout
-
-    // 获取全局导航和 message 实例
-    const navigate = useNavigate()
-    const { message } = useApp()
-
-    // 注入全局 navigate（供工具函数调用）
-    useEffect(() => {
-        setGlobalNavigate(navigate)
-    }, [navigate])
-
-    // 注入全局 message 实例（消除静态方法警告）
-    useEffect(() => {
-        setGlobalMessageInstance(message)
-    }, [message])
 
     // 从公共 store 中获取主题设置
     const {
