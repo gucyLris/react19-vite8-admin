@@ -6,15 +6,17 @@ import {
     Divider,
     Form,
     Input,
-    message,
     theme
 } from 'antd'
 import { useMemo, useState } from 'react'
 
+import { postLoginApi } from '@/api/modules/login'
 import Github from '@/components/github'
 import { ThemeIcon } from '@/components/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
 import type { ILoginFormValues } from '@/types/login'
+import { navigateTo } from '@/utils/historyHelper'
+import { handleErrorMsg, handleSuccessMsg } from '@/utils/messageHelper'
 
 const { defaultAlgorithm, darkAlgorithm } = theme
 
@@ -25,18 +27,21 @@ const LoginPage = () => {
         textClass,
         rootBgClass
     } = useCommonStore()
-
     const [form] = Form.useForm<ILoginFormValues>()
     const [loading, setLoading] = useState(false)
 
-    const onFinish = (values: ILoginFormValues) => {
+    const onFinish = async (values: ILoginFormValues) => {
         setLoading(true)
-        // 模拟登录请求
-        setTimeout(() => {
-            message.success(`欢迎回来，${values.username}`)
+        try {
+            const result = await postLoginApi(values)
+            handleSuccessMsg('登录成功！')
+            localStorage.setItem('token', result.token)
+            navigateTo('/') // SPA 平滑导航
+        } catch (error: any) {
+            handleErrorMsg(error?.message, '登录失败，请重试')
+        } finally {
             setLoading(false)
-            // 实际项目中可在此处理路由跳转、token存储等
-        }, 1000)
+        }
     }
 
     // 动态主题配置
@@ -66,7 +71,7 @@ const LoginPage = () => {
                         className={`flex w-full max-w-md flex-col items-center rounded-2xl ${bgClass} p-3 shadow-lg`}
                     >
                         <div
-                            className={`m-8! text-2xl font-semibold ${textClass}`}
+                            className={`m-8! text-2xl! font-semibold ${textClass}`}
                         >
                             登录页面
                         </div>
@@ -132,6 +137,7 @@ const LoginPage = () => {
                                     loading={loading}
                                     size="large"
                                     type="primary"
+                                    onClick={() => form.submit()}
                                 >
                                     登录
                                 </Button>

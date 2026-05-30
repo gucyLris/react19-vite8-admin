@@ -1,7 +1,7 @@
-import { Layout } from 'antd'
-import { ConfigProvider, theme } from 'antd'
-import { memo, useMemo } from 'react'
-import { Outlet } from 'react-router-dom' // 关键导入
+import { ConfigProvider, Layout, theme } from 'antd'
+import useApp from 'antd/es/app/useApp'
+import { memo, useEffect, useMemo } from 'react'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 import { useCommonStore } from '@/hooks/useCommonStore'
 import { CollapseIcon } from '@/layouts/components/CollapseIcon'
@@ -9,22 +9,44 @@ import { FooterBar } from '@/layouts/components/FooterBar'
 import HeaderPage from '@/layouts/components/HeaderBar'
 import { NavBar } from '@/layouts/components/NavBar'
 import { TreeMenu } from '@/layouts/components/TreeMenu'
-const { defaultAlgorithm, darkAlgorithm } = theme // 导入 Ant Design 的主题算法
+import { setGlobalNavigate } from '@/utils/historyHelper'
+import { setGlobalMessageInstance } from '@/utils/messageHelper'
+
+const { defaultAlgorithm, darkAlgorithm } = theme
 
 function LayoutPage() {
     const { Sider, Content } = Layout
 
+    // 获取全局导航和 message 实例
+    const navigate = useNavigate()
+    const { message } = useApp()
+
+    // 注入全局 navigate（供工具函数调用）
+    useEffect(() => {
+        setGlobalNavigate(navigate)
+    }, [navigate])
+
+    // 注入全局 message 实例（消除静态方法警告）
+    useEffect(() => {
+        setGlobalMessageInstance(message)
+    }, [message])
+
     // 从公共 store 中获取主题设置
-    const { theme } = useCommonStore()
-    // 根据当前主题动态设置 Ant Design 的主题算法，使用 useMemo 进行性能优化，只有当 theme 变化时才重新计算
+    const {
+        theme: currentTheme,
+        bgClass,
+        textClass,
+        rootBgClass
+    } = useCommonStore()
+
     const themeConfig = useMemo(
         () => ({
-            algorithm: [theme === 'dark' ? darkAlgorithm : defaultAlgorithm]
+            algorithm: [
+                currentTheme === 'dark' ? darkAlgorithm : defaultAlgorithm
+            ]
         }),
-        [theme]
+        [currentTheme]
     )
-
-    const { bgClass, textClass, rootBgClass } = useCommonStore()
 
     return (
         <ConfigProvider theme={themeConfig}>

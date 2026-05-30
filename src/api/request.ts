@@ -1,9 +1,11 @@
-// 导入 axios 和 类型
-import axios, { AxiosError } from 'axios'
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError } from 'axios'
 
-import type { ApiResponse, CustomRequestConfig } from './types'
+import { navigateTo } from '@/utils/historyHelper'
+import { handleErrorMsg } from '@/utils/messageHelper'
+
 import { cancelManager } from './cancel'
+import type { ApiResponse, CustomRequestConfig } from './types'
 
 // 获取环境变量（Vite 方式）
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
@@ -12,7 +14,7 @@ const REQUEST_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 180_000
 // 创建 axios 实例
 const service = axios.create({
     baseURL: BASE_URL,
-    timeout: REQUEST_TIMEOUT,
+    timeout: REQUEST_TIMEOUT
 })
 
 // 请求拦截器
@@ -53,25 +55,31 @@ service.interceptors.response.use(
             cancelManager.removePending(config)
         }
 
+        // 实际后端格式：{ data: { code, message, data } }
+        const realCode = data.data?.code
+        const realMessage = data.data?.message
+        const realData = data.data?.data
+
         // 根据业务 code 处理
-        if (data.code === 200) {
+        if (realCode === 200) {
             // 成功：返回 data 部分，便于业务使用
-            return data.data
+            return realData
         }
 
         // 401：未授权，清除 token 并跳转登录
-        if (data.code === 401) {
+        if (realCode === 401) {
             localStorage.removeItem('token')
-            window.location.href = '/login'
-            return Promise.reject(new Error(data.message || '登录已过期'))
+            navigateTo('/login')
+            return Promise.reject(new Error(realMessage || '未授权'))
         }
 
         // 其他业务错误
-        const errorMsg = data.message || '请求失败'
+        const errorMsg = realMessage || '请求失败'
         if (custom?.showError !== false) {
-            // 可接入 UI 提示，例如 message.error(errorMsg)
-            console.error('[响应错误]', errorMsg)
+            debugger
+            handleErrorMsg(errorMsg)
         }
+
         return Promise.reject(new Error(errorMsg))
     },
     (error: AxiosError) => {

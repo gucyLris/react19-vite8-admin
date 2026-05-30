@@ -3,6 +3,9 @@ import { Icon } from '@iconify/react'
 import type { MenuProps } from 'antd'
 import { Dropdown } from 'antd'
 
+import { navigateTo } from '@/utils/historyHelper'
+import { handleSuccessMsg } from '@/utils/messageHelper'
+
 export const UserInfo = () => {
     // 自定义用户信息
     const items: MenuProps['items'] = [
@@ -24,8 +27,10 @@ export const UserInfo = () => {
             // 处理个人中心逻辑
         }
         if (key === 'logout') {
-            console.log('退出登录')
-            // 处理退出登录逻辑，例如清除用户信息、重置状态等
+            localStorage.removeItem('token')
+            // 需要走退出接口 这里调用
+            handleSuccessMsg('已退出登录')
+            navigateTo('/login')
         }
     }
 
