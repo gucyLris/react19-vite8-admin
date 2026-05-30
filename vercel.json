@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://mock.mengxuegu.com/mock/6a1686f17031ce03e7be230a/v1/:path*"
+        }
+    ]
+}
