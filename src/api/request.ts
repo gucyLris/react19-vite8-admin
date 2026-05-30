@@ -1,6 +1,7 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import axios, { AxiosError } from 'axios'
 
+import { getItem, removeItem } from '@/utils/db'
 import { navigateTo } from '@/utils/historyHelper'
 import { handleErrorMsg } from '@/utils/messageHelper'
 
@@ -19,15 +20,17 @@ const service = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-    (config: InternalAxiosRequestConfig & { custom?: CustomRequestConfig }) => {
+    async (
+        config: InternalAxiosRequestConfig & { custom?: CustomRequestConfig }
+    ) => {
         // 1. 处理重复请求取消
         if (config.custom?.cancelDuplicated) {
             const controller = cancelManager.addPending(config)
             config.signal = controller.signal
         }
 
-        // 2. 添加 token（从 localStorage 或其它地方获取）
-        const token = localStorage.getItem('token') || ''
+        // 2. 添加 token（从 localStorage 或其它地方获取 indexDB）
+        const token = await getItem('token')
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`
         }
@@ -46,7 +49,7 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-    (response: AxiosResponse<ApiResponse>) => {
+    async (response: AxiosResponse<ApiResponse>) => {
         const { data, config } = response
         const custom = (config as any).custom as CustomRequestConfig | undefined
 
@@ -68,7 +71,7 @@ service.interceptors.response.use(
 
         // 401：未授权，清除 token 并跳转登录
         if (realCode === 401) {
-            localStorage.removeItem('token')
+            await removeItem('token')
             navigateTo('/login')
             return Promise.reject(new Error(realMessage || '未授权'))
         }

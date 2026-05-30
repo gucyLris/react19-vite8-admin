@@ -7,6 +7,7 @@ import { Devices } from '@/pages/devices'
 import Login from '@/pages/login'
 import { Terminal } from '@/pages/terminal'
 import { Topology } from '@/pages/topology'
+import { getItem } from '@/utils/db'
 
 const router = createBrowserRouter([
     {
@@ -29,11 +30,9 @@ const router = createBrowserRouter([
     {
         path: 'login',
         element: <Login />,
-        loader: () => {
-            if (localStorage.getItem('token')) {
-                return redirect('/')
-            }
-            return null
+        loader: async () => {
+            const isAuth = await getItem('token')
+            return isAuth ? redirect('/') : null
         }
     }
 ])

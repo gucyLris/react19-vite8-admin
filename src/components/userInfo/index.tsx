@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react'
 import type { MenuProps } from 'antd'
 import { Dropdown } from 'antd'
 
+import { removeItem } from '@/utils/db'
 import { navigateTo } from '@/utils/historyHelper'
 import { handleSuccessMsg } from '@/utils/messageHelper'
 
@@ -21,13 +22,13 @@ export const UserInfo = () => {
         }
     ]
 
-    const onClick: MenuProps['onClick'] = ({ key }) => {
+    const onClick: MenuProps['onClick'] = async ({ key }) => {
         if (key === 'userInfo') {
             console.log('个人中心')
             // 处理个人中心逻辑
         }
         if (key === 'logout') {
-            localStorage.removeItem('token')
+            await removeItem('token')
             // 需要走退出接口 这里调用
             handleSuccessMsg('已退出登录')
             navigateTo('/login')

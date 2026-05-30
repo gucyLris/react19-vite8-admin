@@ -1,12 +1,18 @@
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 
-// 判断 token
-const isAuthenticated = () => {
-    return !!localStorage.getItem('token')
-}
+import { getItem } from '@/utils/db'
 
 const ProtectedRoute = () => {
-    return isAuthenticated() ? <Outlet /> : <Navigate replace to="/login" />
+    const [isAuth, setIsAuth] = useState<boolean | null>(null)
+    useEffect(() => {
+        getItem<string>('token').then((token) => {
+            setIsAuth(!!token)
+        })
+    }, [])
+
+    // 判断 token
+    return isAuth ? <Outlet /> : <Navigate replace to="/login" />
 }
 
 export default ProtectedRoute

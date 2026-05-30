@@ -17,6 +17,7 @@ import Github from '@/components/github'
 import { ThemeIcon } from '@/components/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
 import type { ILoginFormValues } from '@/types/login'
+import { setItem } from '@/utils/db'
 import { navigateTo, setGlobalNavigate } from '@/utils/historyHelper'
 import {
     handleErrorMsg,
@@ -55,7 +56,7 @@ const LoginPage = () => {
         try {
             const result = await postLoginApi(values)
             handleSuccessMsg('登录成功！')
-            localStorage.setItem('token', result.token)
+            await setItem('token', result.token) // 存储到 IndexedDB
             navigateTo('/') // SPA 平滑导航
         } catch (error: any) {
             handleErrorMsg(error?.message, '登录失败，请重试')
