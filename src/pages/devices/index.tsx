@@ -23,6 +23,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState
 } from 'react'
 
@@ -196,10 +197,30 @@ export const Devices = () => {
         }
     }
 
+    // 新增：表格容器 ref，用于计算滚动高度
+    const tableContainerRef = useRef<HTMLDivElement>(null)
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(
+        undefined
+    )
+
+    // 动态计算表格滚动高度
+    useEffect(() => {
+        const computeScrollY = () => {
+            if (tableContainerRef.current) {
+                // 容器高度 - 表头高度（Ant Design 默认约 55px，视主题微调）
+                const containerHeight = tableContainerRef.current.clientHeight
+                setTableScrollY(Math.max(100, containerHeight - 55))
+            }
+        }
+        computeScrollY()
+        window.addEventListener('resize', computeScrollY)
+        return () => window.removeEventListener('resize', computeScrollY)
+    }, [dataSource]) // 数据变化时重新计算，避免切换分页时高度错位
+
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full min-h-0 flex-col">
             {/* 统计卡片区域 */}
-            <Row className="mb-8!" gutter={16}>
+            <Row gutter={16}>
                 <Col span={6}>
                     <Card>
                         <Statistic title="全部设备" value={stats.total} />
@@ -228,7 +249,7 @@ export const Devices = () => {
             </Row>
 
             {/* 操作栏 */}
-            <Card>
+            <Card className="mt-4! mb-4!">
                 <div className="flex items-center justify-between">
                     <Input
                         allowClear
@@ -267,20 +288,39 @@ export const Devices = () => {
                 </div>
             </Card>
 
-            {/* 表格卡片 */}
-            <div className="h-full overflow-hidden">
-                <Card className="h-full overflow-auto">
-                    {/* 表格数据 */}
-                    <Spin className="flex-1" spinning={loading}>
+            {/* 表格模块 */}
+            <Card
+                className="min-h-0 flex-1"
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden'
+                }}
+                styles={{
+                    body: {
+                        flex: 1,
+                        overflow: 'hidden',
+                        padding: 0
+                    }
+                }}
+            >
+                <div
+                    ref={tableContainerRef}
+                    style={{ height: '100%', overflow: 'auto' }}
+                >
+                    <Spin spinning={loading}>
                         <Table
                             columns={columns}
                             dataSource={dataSource}
                             pagination={false}
                             rowKey="id"
+                            scroll={{ y: tableScrollY, x: 'max-content' }}
                         />
                     </Spin>
-                </Card>
-            </div>
+                </div>
+            </Card>
+
+            {/* 分页模块 */}
             <Card>
                 <Pagination
                     align="end"
