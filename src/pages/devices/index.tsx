@@ -8,6 +8,7 @@ import {
     Button,
     Card,
     Col,
+    Empty,
     Input,
     message,
     Pagination,
@@ -22,6 +23,7 @@ import {
     startTransition,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState
@@ -91,10 +93,10 @@ export const Devices = () => {
                     setTotal(total)
                     setStats({
                         total,
-                        online: statistics.online,
-                        upgrading: statistics.upgrading,
+                        online: statistics?.online ?? 0,
+                        upgrading: statistics?.upgrading ?? 0,
                         routerPercent: total
-                            ? (statistics.routerCount / total) * 100
+                            ? ((statistics?.routerCount ?? 0) / total) * 100
                             : 0
                     })
                 })
@@ -197,25 +199,94 @@ export const Devices = () => {
         }
     }
 
-    // 新增：表格容器 ref，用于计算滚动高度
+    // ---------- 滚动条修复核心 ----------
     const tableContainerRef = useRef<HTMLDivElement>(null)
     const [tableScrollY, setTableScrollY] = useState<number | undefined>(
         undefined
     )
 
-    // 动态计算表格滚动高度
-    useEffect(() => {
-        const computeScrollY = () => {
-            if (tableContainerRef.current) {
-                // 容器高度 - 表头高度（Ant Design 默认约 55px，视主题微调）
-                const containerHeight = tableContainerRef.current.clientHeight
-                setTableScrollY(Math.max(100, containerHeight - 55))
-            }
+    // 获取表头实际高度（包括可能的筛选栏等）
+    const getHeaderHeight = useCallback((): number => {
+        if (!tableContainerRef.current) return 55
+        // 查找 antd 表头区域
+        const thead =
+            tableContainerRef.current.querySelector('.ant-table-thead')
+        if (thead) {
+            const headerRow = thead.querySelector('tr')
+            if (headerRow) return headerRow.getBoundingClientRect().height
         }
-        computeScrollY()
-        window.addEventListener('resize', computeScrollY)
-        return () => window.removeEventListener('resize', computeScrollY)
-    }, [dataSource]) // 数据变化时重新计算，避免切换分页时高度错位
+        // 降级：查找 ant-table-header
+        const headerDiv =
+            tableContainerRef.current.querySelector('.ant-table-header')
+        if (headerDiv) return headerDiv.getBoundingClientRect().height
+        return 55
+    }, [])
+
+    const updateScrollY = useCallback(() => {
+        if (!tableContainerRef.current) return
+        // 使用 raf 确保布局稳定
+        requestAnimationFrame(() => {
+            const container = tableContainerRef.current
+            if (!container) return
+            const containerHeight = container.clientHeight
+            if (containerHeight === 0) return
+            const headerHeight = getHeaderHeight()
+            // 计算可用滚动高度，减去 2px 避免出现双滚动条
+            let available = containerHeight - headerHeight - 2
+            if (available < 100) available = 100
+            setTableScrollY(Math.floor(available))
+        })
+    }, [getHeaderHeight])
+
+    // 使用 useLayoutEffect 同步测量，避免闪烁
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return
+        // 立即执行一次
+        updateScrollY()
+        // 监听容器大小变化
+        const resizeObserver = new ResizeObserver(() => updateScrollY())
+        resizeObserver.observe(tableContainerRef.current)
+        return () => resizeObserver.disconnect()
+    }, [updateScrollY])
+
+    // 数据变化或 loading 变化时，表格重绘后再次更新高度
+    useEffect(() => {
+        const timer = setTimeout(() => updateScrollY(), 60)
+        return () => clearTimeout(timer)
+    }, [dataSource, loading, updateScrollY])
+
+    // 窗口大小变化时重新计算
+    useEffect(() => {
+        window.addEventListener('resize', updateScrollY)
+        return () => window.removeEventListener('resize', updateScrollY)
+    }, [updateScrollY])
+
+    const rowSelection = {
+        onChange: (selectedRowKeys: React.Key[], selectedRows: any) => {
+            console.log(`selectedRowKeys: ${selectedRowKeys}`, selectedRows)
+        }
+    }
+
+    // 空状态渲染：确保高度与滚动区域匹配，但避免产生额外滚动条
+    const renderEmpty = () => {
+        // 如果有数据或滚动高度未定义，使用默认空状态
+        if (dataSource.length > 0 || !tableScrollY) {
+            return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        }
+        // 空数据时设置一个占位高度，避免表格塌陷
+        return (
+            <div
+                style={{
+                    height: tableScrollY,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            </div>
+        )
+    }
 
     return (
         <div className="flex h-full min-h-0 flex-col">
@@ -303,29 +374,35 @@ export const Devices = () => {
                     body: {
                         flex: 1,
                         overflow: 'hidden',
-                        padding: 0
+                        padding: 0,
+                        display: 'flex',
+                        flexDirection: 'column'
                     }
                 }}
             >
                 <div
                     ref={tableContainerRef}
-                    style={{ height: '100%', overflow: 'hidden' }}
+                    style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
                 >
-                    <Spin
-                        spinning={loading}
-                        styles={{
-                            container: {
-                                overflow: 'hidden'
-                            }
-                        }}
-                    >
-                        <Table
-                            columns={columns}
-                            dataSource={dataSource}
-                            pagination={false}
-                            rowKey="id"
-                            scroll={{ y: tableScrollY, x: 'max-content' }}
-                        />
+                    <Spin spinning={loading} style={{ height: '100%' }}>
+                        {/* 关键：给 Spin 的包裹元素明确高度 */}
+                        <div style={{ height: '100%', position: 'relative' }}>
+                            <Table
+                                columns={columns}
+                                dataSource={dataSource}
+                                locale={{ emptyText: renderEmpty() }}
+                                pagination={false}
+                                rowKey="id"
+                                rowSelection={rowSelection}
+                                // 只有有数据且滚动高度有效时才启用 y 滚动，避免空数据出现无用滚动条
+                                scroll={
+                                    dataSource.length > 0 && tableScrollY
+                                        ? { y: tableScrollY, x: true }
+                                        : { x: true }
+                                }
+                                sticky
+                            />
+                        </div>
                     </Spin>
                 </div>
             </Card>
