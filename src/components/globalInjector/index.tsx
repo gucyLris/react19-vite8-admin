@@ -1,10 +1,10 @@
-import useApp from 'antd/es/app/useApp'
+import { message as antdMessage } from 'antd'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { usePublicStore } from '@/stores/publicStore'
 import { setGlobalNavigate } from '@/utils/historyHelper'
-import { setGlobalMessageInstance } from '@/utils/messageHelper'
+import { setMessageApi } from '@/utils/messageHelper'
 
 export function GlobalInjector() {
     // 主题的异步初始化与持久化存储
@@ -13,15 +13,16 @@ export function GlobalInjector() {
         initializeTheme()
     }, [initializeTheme])
 
-    // 获取全局导航和 message 实例
+    // 获取全局导航
     const navigate = useNavigate()
-    const { message } = useApp()
 
+    // Antd message Hooks 调用
+    const [api, contextHolder] = antdMessage.useMessage()
     // 注入全局 navigate（供工具函数调用）
     useEffect(() => {
         setGlobalNavigate(navigate)
-        setGlobalMessageInstance(message)
-    }, [navigate, message]) // 依赖稳定，只执行一次
+        setMessageApi(api)
+    }, [navigate, api]) // 依赖稳定，只执行一次
 
-    return null
+    return <>{contextHolder}</>
 }
