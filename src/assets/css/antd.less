@@ -1,3 +1,5 @@
+@import url('./common.less');
+
 .ant-menu-root {
     border-color: transparent !important;
     background-color: transparent !important;
@@ -9,4 +11,24 @@
 
 .ant-form-item-explain-error {
     font-size: 12px !important;
+}
+
+// 表格滚动条样式
+.ant-table-body {
+    &::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: @scrollbar-thumb-color;
+        border-radius: 2px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: @scrollbar-thumb-hover-color;
+    }
+    scrollbar-width: thin;
+    scrollbar-color: @scrollbar-thumb-color @scrollbar-track-color;
 }

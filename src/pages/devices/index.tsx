@@ -294,7 +294,10 @@ export const Devices = () => {
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    borderTop: 'none',
+                    borderBottomRightRadius: 0,
+                    borderBottomLeftRadius: 0
                 }}
                 styles={{
                     body: {
@@ -306,9 +309,16 @@ export const Devices = () => {
             >
                 <div
                     ref={tableContainerRef}
-                    style={{ height: '100%', overflow: 'auto' }}
+                    style={{ height: '100%', overflow: 'hidden' }}
                 >
-                    <Spin spinning={loading}>
+                    <Spin
+                        spinning={loading}
+                        styles={{
+                            container: {
+                                overflow: 'hidden'
+                            }
+                        }}
+                    >
                         <Table
                             columns={columns}
                             dataSource={dataSource}
@@ -321,7 +331,13 @@ export const Devices = () => {
             </Card>
 
             {/* 分页模块 */}
-            <Card>
+            <Card
+                style={{
+                    borderTop: 'none',
+                    borderTopRightRadius: 0,
+                    borderTopLeftRadius: 0
+                }}
+            >
                 <Pagination
                     align="end"
                     current={page}
