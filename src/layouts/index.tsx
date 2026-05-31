@@ -34,12 +34,14 @@ function LayoutPage() {
 
     return (
         <ConfigProvider theme={themeConfig}>
-            <div className={`flex h-screen w-full flex-col ${rootBgClass}`}>
-                <Layout>
+            <div
+                className={`flex h-screen w-full min-w-0 flex-col overflow-hidden ${rootBgClass}`}
+            >
+                <Layout className="min-h-0 flex-1 overflow-hidden">
                     <HeaderPage />
-                    <Layout>
+                    <Layout className="min-h-0 flex-1 overflow-hidden">
                         <Sider
-                            className="flex h-full flex-col"
+                            className="flex h-full min-h-0 flex-col"
                             collapsedWidth={80}
                             width={150}
                         >
@@ -54,12 +56,12 @@ function LayoutPage() {
                                 </div>
                             </div>
                         </Sider>
-                        <Content className="box-border overflow-hidden">
+                        <Content className="box-border flex min-h-0 min-w-0 flex-col overflow-hidden">
                             <div className="flex h-8 items-center justify-start px-6!">
                                 <NavBar />
                             </div>
                             <div
-                                className={`m-6! mt-0! h-[calc(100%-24px-32px)] rounded-md p-4! shadow-sm ${bgClass} ${textClass}`}
+                                className={`m-6! mt-0! min-h-0 flex-1 overflow-hidden rounded-md p-4! shadow-sm ${bgClass} ${textClass}`}
                             >
                                 <Outlet /> {/* 子路由的内容会渲染在这里 */}
                             </div>

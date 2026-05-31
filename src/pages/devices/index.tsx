@@ -111,7 +111,9 @@ export const Devices = () => {
     )
 
     useEffect(() => {
-        loadDevices(page, pageSize, debouncedName)
+        startTransition(() => {
+            loadDevices(page, pageSize, debouncedName)
+        })
     }, [page, pageSize, debouncedName, loadDevices])
 
     const handleRestart = useCallback((device: IDeviceItem) => {
@@ -189,6 +191,14 @@ export const Devices = () => {
     const handleBatchDelete = useCallback(() => message.info('批量删除'), [])
     const handleAddDevice = useCallback(() => message.info('添加设备'), [])
 
+    const handleSearchNameChange = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            setSearchName(event.target.value)
+            setPage((currentPage) => (currentPage === 1 ? currentPage : 1))
+        },
+        []
+    )
+
     // 分页变化处理（修复 pageSize 变化时重置页码）
     const onPageChange = (newPage: number, newPageSize?: number) => {
         if (newPageSize && newPageSize !== pageSize) {
@@ -199,78 +209,51 @@ export const Devices = () => {
         }
     }
 
-    // ---------- 滚动条修复核心 ----------
+    // 表格外壳同步计算高度
     const tableContainerRef = useRef<HTMLDivElement>(null)
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(
-        undefined
-    )
+    const [tableScrollY, setTableScrollY] = useState(240)
 
-    // 获取表头实际高度（包括可能的筛选栏等）
-    const getHeaderHeight = useCallback((): number => {
-        if (!tableContainerRef.current) return 55
-        // 查找 antd 表头区域
-        const thead =
-            tableContainerRef.current.querySelector('.ant-table-thead')
-        if (thead) {
-            const headerRow = thead.querySelector('tr')
-            if (headerRow) return headerRow.getBoundingClientRect().height
-        }
-        // 降级：查找 ant-table-header
-        const headerDiv =
-            tableContainerRef.current.querySelector('.ant-table-header')
-        if (headerDiv) return headerDiv.getBoundingClientRect().height
-        return 55
+    const updateTableScrollY = useCallback(() => {
+        const container = tableContainerRef.current
+        if (!container) return
+
+        const header =
+            container.querySelector('.ant-table-thead tr') ??
+            container.querySelector('.ant-table-header')
+        const headerHeight = header?.getBoundingClientRect().height ?? 55
+        const nextScrollY = Math.max(
+            100,
+            Math.floor(container.clientHeight - headerHeight - 2)
+        )
+
+        setTableScrollY((prevScrollY) =>
+            Math.abs(prevScrollY - nextScrollY) > 1 ? nextScrollY : prevScrollY
+        )
     }, [])
 
-    const updateScrollY = useCallback(() => {
-        if (!tableContainerRef.current) return
-        // 使用 raf 确保布局稳定
-        requestAnimationFrame(() => {
-            const container = tableContainerRef.current
-            if (!container) return
-            const containerHeight = container.clientHeight
-            if (containerHeight === 0) return
-            const headerHeight = getHeaderHeight()
-            // 计算可用滚动高度，减去 2px 避免出现双滚动条
-            let available = containerHeight - headerHeight - 2
-            if (available < 100) available = 100
-            setTableScrollY(Math.floor(available))
-        })
-    }, [getHeaderHeight])
-
-    // 使用 useLayoutEffect 同步测量，避免闪烁
     useLayoutEffect(() => {
-        if (!tableContainerRef.current) return
-        // 立即执行一次
-        updateScrollY()
-        // 监听容器大小变化
-        const resizeObserver = new ResizeObserver(() => updateScrollY())
-        resizeObserver.observe(tableContainerRef.current)
-        return () => resizeObserver.disconnect()
-    }, [updateScrollY])
+        updateTableScrollY()
+        window.addEventListener('resize', updateTableScrollY)
+        return () => window.removeEventListener('resize', updateTableScrollY)
+    }, [updateTableScrollY])
 
-    // 数据变化或 loading 变化时，表格重绘后再次更新高度
-    useEffect(() => {
-        const timer = setTimeout(() => updateScrollY(), 60)
-        return () => clearTimeout(timer)
-    }, [dataSource, loading, updateScrollY])
-
-    // 窗口大小变化时重新计算
-    useEffect(() => {
-        window.addEventListener('resize', updateScrollY)
-        return () => window.removeEventListener('resize', updateScrollY)
-    }, [updateScrollY])
-
-    const rowSelection = {
-        onChange: (selectedRowKeys: React.Key[], selectedRows: any) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, selectedRows)
-        }
-    }
+    const rowSelection = useMemo(
+        () => ({
+            onChange: (
+                selectedRowKeys: React.Key[],
+                selectedRows: IDeviceItem[]
+            ) => {
+                console.log(`selectedRowKeys: ${selectedRowKeys}`, selectedRows)
+            }
+        }),
+        []
+    )
+    const isEmptyTable = dataSource.length === 0
 
     // 空状态渲染：确保高度与滚动区域匹配，但避免产生额外滚动条
     const renderEmpty = () => {
-        // 如果有数据或滚动高度未定义，使用默认空状态
-        if (dataSource.length > 0 || !tableScrollY) {
+        // 如果有数据，使用默认空状态
+        if (dataSource.length) {
             return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
         }
         // 空数据时设置一个占位高度，避免表格塌陷
@@ -328,7 +311,7 @@ export const Devices = () => {
                         prefix={<SearchOutlined />}
                         style={{ width: 320 }}
                         value={searchName}
-                        onChange={(e) => setSearchName(e.target.value)}
+                        onChange={handleSearchNameChange}
                     />
 
                     <Space wrap>
@@ -382,6 +365,11 @@ export const Devices = () => {
             >
                 <div
                     ref={tableContainerRef}
+                    className={
+                        isEmptyTable
+                            ? 'devices-table-shell devices-table-empty'
+                            : 'devices-table-shell'
+                    }
                     style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
                 >
                     <Spin spinning={loading} style={{ height: '100%' }}>
@@ -394,12 +382,7 @@ export const Devices = () => {
                                 pagination={false}
                                 rowKey="id"
                                 rowSelection={rowSelection}
-                                // 只有有数据且滚动高度有效时才启用 y 滚动，避免空数据出现无用滚动条
-                                scroll={
-                                    dataSource.length > 0 && tableScrollY
-                                        ? { y: tableScrollY, x: true }
-                                        : { x: true }
-                                }
+                                scroll={{ y: tableScrollY, x: true }}
                                 sticky
                             />
                         </div>

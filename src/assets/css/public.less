@@ -148,7 +148,14 @@ html {
 
 // 全局字体与渲染
 body {
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', sans-serif;
+    font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        'Helvetica Neue',
+        'Noto Sans',
+        sans-serif;
     line-height: 1.5;
     font-weight: 400;
     color: #1f2937;
@@ -215,13 +222,13 @@ a {
 }
 
 // 移除数字输入框 spinner
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
     -moz-appearance: textfield;
     appearance: textfield;
 }
@@ -347,7 +354,9 @@ object {
 
 // 内容过渡动画（淡入淡出 + 位移）
 .content-transition {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
 }
 
 .content-hidden {

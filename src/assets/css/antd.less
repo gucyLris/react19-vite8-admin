@@ -32,3 +32,19 @@
     scrollbar-width: thin;
     scrollbar-color: @scrollbar-thumb-color @scrollbar-track-color;
 }
+
+.devices-table-shell {
+    .ant-table-body {
+        overflow-y: auto !important;
+    }
+}
+
+.devices-table-empty {
+    .ant-table-body {
+        overflow: hidden !important;
+    }
+
+    .ant-table-placeholder {
+        height: 100%;
+    }
+}
