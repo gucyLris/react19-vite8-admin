@@ -1,5 +1,7 @@
 import {
     DeleteOutlined,
+    FullscreenExitOutlined,
+    FullscreenOutlined,
     PlusOutlined,
     ReloadOutlined,
     SearchOutlined
@@ -7,16 +9,15 @@ import {
 import {
     Button,
     Card,
-    Col,
     Empty,
     Input,
     message,
     Pagination,
-    Row,
     Space,
     Spin,
-    Statistic,
-    Table
+    Table,
+    Tag,
+    Tooltip
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import {
@@ -31,6 +32,12 @@ import {
 
 import { fetchDevicesAPI } from '@/api/modules/devices'
 import {
+    DEVICE_STATUS_META,
+    DEVICE_TYPE_LABEL,
+    type DeviceStats
+} from '@/constants/devices'
+import { useCommonStore } from '@/hooks/useCommonStore'
+import {
     DeviceStatus,
     type DeviceStatusType,
     DeviceType,
@@ -38,19 +45,15 @@ import {
     type IDeviceItem
 } from '@/types/device'
 
-// 状态/类型映射
-const statusMap: Record<DeviceStatusType, { color: string; text: string }> = {
-    [DeviceStatus.Online]: { color: 'green', text: '在线' },
-    [DeviceStatus.Offline]: { color: 'red', text: '离线' },
-    [DeviceStatus.Upgrading]: { color: 'orange', text: '升级中' }
-}
-const typeMap: Record<DeviceTypeType, string> = {
-    [DeviceType.Router]: '路由器',
-    [DeviceType.Switch]: '交换机',
-    [DeviceType.AP]: 'AP'
+import { DeviceCharts } from './components/DeviceCharts'
+
+const getInitialTableScrollY = () => {
+    if (typeof window === 'undefined') return 260
+    return Math.max(180, window.innerHeight - 590)
 }
 
 export const Devices = () => {
+    const { theme: currentTheme } = useCommonStore()
     const [loading, setLoading] = useState(false)
     const [dataSource, setDataSource] = useState<IDeviceItem[]>([])
     const [total, setTotal] = useState(0)
@@ -58,13 +61,19 @@ export const Devices = () => {
     const [pageSize, setPageSize] = useState(10)
     const [searchName, setSearchName] = useState('')
     const [debouncedName, setDebouncedName] = useState('')
+    const [isTableFocusMode, setIsTableFocusMode] = useState(false)
+    const [activeStatusFilters, setActiveStatusFilters] = useState<
+        DeviceStatusType[]
+    >([])
+    const [activeTypeFilters, setActiveTypeFilters] = useState<
+        DeviceTypeType[]
+    >([])
 
     // 统计数据
-    const [stats, setStats] = useState({
+    const [stats, setStats] = useState<DeviceStats>({
         total: 0,
         online: 0,
-        upgrading: 0,
-        routerPercent: 0
+        upgrading: 0
     })
 
     // 防抖搜索
@@ -94,10 +103,7 @@ export const Devices = () => {
                     setStats({
                         total,
                         online: statistics?.online ?? 0,
-                        upgrading: statistics?.upgrading ?? 0,
-                        routerPercent: total
-                            ? ((statistics?.routerCount ?? 0) / total) * 100
-                            : 0
+                        upgrading: statistics?.upgrading ?? 0
                     })
                 })
             } catch (error) {
@@ -123,6 +129,69 @@ export const Devices = () => {
         message.warning(`删除设备: ${device.name}`)
     }, [])
 
+    // 图表图例和扇区点击都会走筛选函数，前端先基于当前页数据做轻量联动。
+    const toggleStatusFilter = useCallback((status: DeviceStatusType) => {
+        setActiveStatusFilters((currentFilters) =>
+            currentFilters.includes(status)
+                ? currentFilters.filter((item) => item !== status)
+                : [...currentFilters, status]
+        )
+    }, [])
+
+    const toggleTypeFilter = useCallback((type: DeviceTypeType) => {
+        setActiveTypeFilters((currentFilters) =>
+            currentFilters.includes(type)
+                ? currentFilters.filter((item) => item !== type)
+                : [...currentFilters, type]
+        )
+    }, [])
+
+    const clearChartFilters = useCallback(() => {
+        setActiveStatusFilters([])
+        setActiveTypeFilters([])
+    }, [])
+
+    const statusCounts = useMemo(() => {
+        const online = stats.online
+        const upgrading = stats.upgrading
+        const offline = Math.max(stats.total - online - upgrading, 0)
+        return {
+            [DeviceStatus.Online]: online,
+            [DeviceStatus.Offline]: offline,
+            [DeviceStatus.Upgrading]: upgrading
+        }
+    }, [stats.online, stats.total, stats.upgrading])
+
+    const typeCounts = useMemo(() => {
+        return dataSource.reduce(
+            (counts, device) => {
+                counts[device.type] += 1
+                return counts
+            },
+            {
+                [DeviceType.Router]: 0,
+                [DeviceType.Switch]: 0,
+                [DeviceType.AP]: 0
+            } as Record<DeviceTypeType, number>
+        )
+    }, [dataSource])
+
+    const filteredDataSource = useMemo(() => {
+        return dataSource.filter((device) => {
+            const isStatusMatched =
+                activeStatusFilters.length === 0 ||
+                activeStatusFilters.includes(device.status)
+            const isTypeMatched =
+                activeTypeFilters.length === 0 ||
+                activeTypeFilters.includes(device.type)
+            return isStatusMatched && isTypeMatched
+        })
+    }, [activeStatusFilters, activeTypeFilters, dataSource])
+
+    const hasChartFilter =
+        activeStatusFilters.length > 0 || activeTypeFilters.length > 0
+
+    // 表格列定义集中在这里，设备状态/类型文案统一从 constants 读取。
     const columns = useMemo<ColumnsType<IDeviceItem>>(
         () => [
             {
@@ -137,7 +206,7 @@ export const Devices = () => {
                 dataIndex: 'status',
                 key: 'status',
                 render: (status: DeviceStatusType) => {
-                    const item = statusMap[status]
+                    const item = DEVICE_STATUS_META[status]
                     return (
                         <span style={{ color: item?.color }}>{item?.text}</span>
                     )
@@ -147,7 +216,8 @@ export const Devices = () => {
                 title: '设备类型',
                 dataIndex: 'type',
                 key: 'type',
-                render: (type: DeviceTypeType) => typeMap[type] || type
+                render: (type: DeviceTypeType) =>
+                    DEVICE_TYPE_LABEL[type] || type
             },
             { title: '设备款型', dataIndex: 'model', key: 'model' },
             {
@@ -191,6 +261,11 @@ export const Devices = () => {
     const handleBatchDelete = useCallback(() => message.info('批量删除'), [])
     const handleAddDevice = useCallback(() => message.info('添加设备'), [])
 
+    // 表格聚焦模式只隐藏图表区，保留搜索和批量操作，方便大数据量时查看表格。
+    const toggleTableFocusMode = useCallback(() => {
+        setIsTableFocusMode((currentMode) => !currentMode)
+    }, [])
+
     const handleSearchNameChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             setSearchName(event.target.value)
@@ -211,8 +286,9 @@ export const Devices = () => {
 
     // 表格外壳同步计算高度
     const tableContainerRef = useRef<HTMLDivElement>(null)
-    const [tableScrollY, setTableScrollY] = useState(240)
+    const [tableScrollY, setTableScrollY] = useState(getInitialTableScrollY)
 
+    // 表格占满剩余空间时需要同步 scroll.y，否则路由切换和筛选后容易出现高度跳动。
     const updateTableScrollY = useCallback(() => {
         const container = tableContainerRef.current
         if (!container) return
@@ -232,10 +308,34 @@ export const Devices = () => {
     }, [])
 
     useLayoutEffect(() => {
+        const container = tableContainerRef.current
         updateTableScrollY()
+
+        let frameId = window.requestAnimationFrame(updateTableScrollY)
+        const resizeObserver =
+            container && 'ResizeObserver' in window
+                ? new ResizeObserver(() => {
+                      window.cancelAnimationFrame(frameId)
+                      frameId = window.requestAnimationFrame(updateTableScrollY)
+                  })
+                : null
+
+        if (container) resizeObserver?.observe(container)
         window.addEventListener('resize', updateTableScrollY)
-        return () => window.removeEventListener('resize', updateTableScrollY)
+
+        return () => {
+            window.cancelAnimationFrame(frameId)
+            resizeObserver?.disconnect()
+            window.removeEventListener('resize', updateTableScrollY)
+        }
     }, [updateTableScrollY])
+
+    useLayoutEffect(() => {
+        updateTableScrollY()
+
+        const frameId = window.requestAnimationFrame(updateTableScrollY)
+        return () => window.cancelAnimationFrame(frameId)
+    }, [filteredDataSource.length, loading, updateTableScrollY])
 
     const rowSelection = useMemo(
         () => ({
@@ -248,12 +348,12 @@ export const Devices = () => {
         }),
         []
     )
-    const isEmptyTable = dataSource.length === 0
+    const isEmptyTable = filteredDataSource.length === 0
 
     // 空状态渲染：确保高度与滚动区域匹配，但避免产生额外滚动条
     const renderEmpty = () => {
         // 如果有数据，使用默认空状态
-        if (dataSource.length) {
+        if (filteredDataSource.length) {
             return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
         }
         // 空数据时设置一个占位高度，避免表格塌陷
@@ -272,49 +372,95 @@ export const Devices = () => {
     }
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
-            {/* 统计卡片区域 */}
-            <Row gutter={16}>
-                <Col span={6}>
-                    <Card>
-                        <Statistic title="全部设备" value={stats.total} />
-                    </Card>
-                </Col>
-                <Col span={6}>
-                    <Card>
-                        <Statistic title="在线设备" value={stats.online} />
-                    </Card>
-                </Col>
-                <Col span={6}>
-                    <Card>
-                        <Statistic title="待升级设备" value={stats.upgrading} />
-                    </Card>
-                </Col>
-                <Col span={6}>
-                    <Card>
-                        <Statistic
-                            precision={0}
-                            suffix="%"
-                            title="路由器占比"
-                            value={stats.routerPercent}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+        <div
+            className={`devices-page devices-page-${currentTheme} ${
+                isTableFocusMode ? 'devices-page-table-focus' : ''
+            } flex h-full min-h-0 flex-col`}
+        >
+            <DeviceCharts
+                activeStatusFilters={activeStatusFilters}
+                activeTypeFilters={activeTypeFilters}
+                dataSourceLength={dataSource.length}
+                stats={stats}
+                statusCounts={statusCounts}
+                theme={currentTheme}
+                typeCounts={typeCounts}
+                onStatusFilterChange={toggleStatusFilter}
+                onTypeFilterChange={toggleTypeFilter}
+            />
 
             {/* 操作栏 */}
-            <Card className="mt-4! mb-4!">
+            <Card className="devices-toolbar-card mt-4! mb-4!">
                 <div className="flex items-center justify-between">
-                    <Input
-                        allowClear
-                        placeholder="按设备名称搜索"
-                        prefix={<SearchOutlined />}
-                        style={{ width: 320 }}
-                        value={searchName}
-                        onChange={handleSearchNameChange}
-                    />
+                    <div className="devices-toolbar-left">
+                        <Input
+                            allowClear
+                            placeholder="按设备名称搜索"
+                            prefix={<SearchOutlined />}
+                            style={{ width: 320 }}
+                            value={searchName}
+                            onChange={handleSearchNameChange}
+                        />
+
+                        {hasChartFilter && (
+                            <Space className="devices-filter-tags" wrap>
+                                {activeStatusFilters.map((status) => (
+                                    <Tag
+                                        key={status}
+                                        closable
+                                        color={DEVICE_STATUS_META[status].color}
+                                        onClose={(event) => {
+                                            event.preventDefault()
+                                            toggleStatusFilter(status)
+                                        }}
+                                    >
+                                        状态：{DEVICE_STATUS_META[status].text}
+                                    </Tag>
+                                ))}
+                                {activeTypeFilters.map((type) => (
+                                    <Tag
+                                        key={type}
+                                        closable
+                                        color="blue"
+                                        onClose={(event) => {
+                                            event.preventDefault()
+                                            toggleTypeFilter(type)
+                                        }}
+                                    >
+                                        类型：{DEVICE_TYPE_LABEL[type]}
+                                    </Tag>
+                                ))}
+                                <Button type="link" onClick={clearChartFilters}>
+                                    清空筛选
+                                </Button>
+                            </Space>
+                        )}
+                    </div>
 
                     <Space wrap>
+                        <Tooltip
+                            title={
+                                isTableFocusMode
+                                    ? '恢复图表总览'
+                                    : '放大表格区域'
+                            }
+                        >
+                            <Button
+                                aria-label={
+                                    isTableFocusMode
+                                        ? '恢复图表总览'
+                                        : '放大表格区域'
+                                }
+                                icon={
+                                    isTableFocusMode ? (
+                                        <FullscreenExitOutlined />
+                                    ) : (
+                                        <FullscreenOutlined />
+                                    )
+                                }
+                                onClick={toggleTableFocusMode}
+                            />
+                        </Tooltip>
                         <Button
                             icon={<ReloadOutlined />}
                             onClick={handleBatchRestart}
@@ -344,7 +490,7 @@ export const Devices = () => {
 
             {/* 表格模块 */}
             <Card
-                className="min-h-0 flex-1"
+                className="devices-data-card min-h-0 flex-1"
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -377,7 +523,7 @@ export const Devices = () => {
                         <div style={{ height: '100%', position: 'relative' }}>
                             <Table
                                 columns={columns}
-                                dataSource={dataSource}
+                                dataSource={filteredDataSource}
                                 locale={{ emptyText: renderEmpty() }}
                                 pagination={false}
                                 rowKey="id"
@@ -392,6 +538,7 @@ export const Devices = () => {
 
             {/* 分页模块 */}
             <Card
+                className="devices-pagination-card"
                 style={{
                     borderTop: 'none',
                     borderTopRightRadius: 0,
@@ -404,7 +551,7 @@ export const Devices = () => {
                     pageSize={pageSize}
                     showSizeChanger
                     showTotal={(total) => `共 ${total} 条`}
-                    total={total}
+                    total={hasChartFilter ? filteredDataSource.length : total}
                     onChange={onPageChange}
                     onShowSizeChange={onPageChange}
                 />
