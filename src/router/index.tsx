@@ -22,11 +22,31 @@ const router = createBrowserRouter([
                         path: '/',
                         element: <Layouts />,
                         children: [
-                            { index: true, element: <Dashboard /> },
-                            { path: 'dashboard', element: <Dashboard /> },
-                            { path: 'topology', element: <Topology /> },
-                            { path: 'devices', element: <Devices /> },
-                            { path: 'terminal', element: <Terminal /> }
+                            {
+                                index: true,
+                                element: <Dashboard />,
+                                handle: { breadcrumb: '看板' }
+                            },
+                            {
+                                path: 'dashboard',
+                                element: <Dashboard />,
+                                handle: { breadcrumb: '看板' }
+                            },
+                            {
+                                path: 'topology',
+                                element: <Topology />,
+                                handle: { breadcrumb: '拓扑' }
+                            },
+                            {
+                                path: 'devices',
+                                element: <Devices />,
+                                handle: { breadcrumb: '设备' }
+                            },
+                            {
+                                path: 'terminal',
+                                element: <Terminal />,
+                                handle: { breadcrumb: '终端' }
+                            }
                         ]
                     }
                 ]

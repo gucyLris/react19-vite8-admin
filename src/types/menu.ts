@@ -18,4 +18,6 @@ export interface IMenuItem {
 }
 
 // Ant Design Menu 的 Item 类型
-export type AntdMenuItem = NonNullable<MenuProps['items']>[number]
+export type MenuItemType = NonNullable<MenuProps['items']>[number]
+export type AntdMenuItem = MenuItemType
+export type MenuClickInfo = Parameters<NonNullable<MenuProps['onClick']>>[0]

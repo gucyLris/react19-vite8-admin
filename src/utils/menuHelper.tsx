@@ -1,8 +1,4 @@
-import type { MenuProps } from 'antd'
-
-import type { IMenuItem } from '@/types/menu'
-
-type MenuItemType = NonNullable<MenuProps['items']>[number]
+import type { IMenuItem, MenuItemType } from '@/types/menu'
 
 /**
  * 将后端菜单数据转换为 Ant Design Menu 的 items
@@ -81,4 +77,49 @@ export const findMenuItemByKey = (
         }
     }
     return undefined
+}
+
+// 规范化路径，去掉多余的斜杠，确保路径以单斜杠开头且不以斜杠结尾（除非是根路径）
+const normalizePath = (path?: string) => {
+    if (!path) return ''
+    if (path === '/') return '/'
+    return path.replace(/\/+$/, '') || '/'
+}
+
+/**
+ * 根据当前路由路径在菜单数据中找到对应的 key 路径（从根到匹配项的 key 数组）
+ * @param menus 原始菜单数组
+ * @param pathname 当前路由路径
+ * @returns 匹配的 key 路径数组，如果没有匹配项则返回空数组
+ */
+export const findMenuKeyPathByRoute = (
+    menus: IMenuItem[],
+    pathname: string
+): string[] => {
+    const normalizedPath = normalizePath(pathname)
+    let bestKeyPath: string[] = []
+    let bestMatchLength = -1
+
+    const walk = (list: IMenuItem[], parentKeys: string[] = []) => {
+        for (const item of list) {
+            const currentKeyPath = [...parentKeys, item.key]
+            const routerPath = normalizePath(item.router)
+            const isMatched =
+                routerPath &&
+                (normalizedPath === routerPath ||
+                    normalizedPath.startsWith(`${routerPath}/`))
+
+            if (isMatched && routerPath.length > bestMatchLength) {
+                bestMatchLength = routerPath.length
+                bestKeyPath = currentKeyPath
+            }
+
+            if (item.children?.length) {
+                walk(item.children, currentKeyPath)
+            }
+        }
+    }
+
+    walk(menus)
+    return bestKeyPath
 }

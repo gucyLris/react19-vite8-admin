@@ -57,7 +57,7 @@ function LayoutPage() {
                             </div>
                         </Sider>
                         <Content className="box-border flex min-h-0 min-w-0 flex-col overflow-hidden">
-                            <div className="flex h-8 items-center justify-start px-6!">
+                            <div className="flex h-10 items-center justify-start px-6!">
                                 <NavBar />
                             </div>
                             <div

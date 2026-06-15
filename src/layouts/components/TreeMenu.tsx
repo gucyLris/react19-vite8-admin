@@ -1,11 +1,16 @@
 import { Menu } from 'antd'
 import { useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useShallow } from 'zustand/react/shallow'
 
 import { getMenusApi } from '@/api/modules/menus'
 import { useMenuStore } from '@/stores'
-import { findMenuItemByKey, transformMenuToAntd } from '@/utils/menuHelper'
+import type { MenuClickInfo } from '@/types/menu'
+import {
+    findMenuItemByKey,
+    findMenuKeyPathByRoute,
+    transformMenuToAntd
+} from '@/utils/menuHelper'
 
 export const TreeMenu = () => {
     // 从 Zustand 菜单 store 中获取菜单列表和设置菜单列表的函数，使用 useShallow 进行浅比较以优化性能
@@ -33,10 +38,27 @@ export const TreeMenu = () => {
         [menuList, locale]
     )
 
-    // 声明 navigate 函数
     const navigate = useNavigate()
+    const location = useLocation()
 
-    const handleMenuClick = ({ key }: { key: string }) => {
+    // 计算当前路由对应的菜单项的 key 路径，使用 useMemo 进行性能优化
+    const selectedKeyPath = useMemo(
+        () => findMenuKeyPathByRoute(menuList, location.pathname),
+        [location.pathname, menuList]
+    )
+
+    // 计算当前选中的菜单项的 key，取 selectedKeyPath 的最后一个元素，如果 selectedKeyPath 为空，则 selectedKeys 也为空
+    const selectedKeys = selectedKeyPath.length
+        ? [selectedKeyPath[selectedKeyPath.length - 1]]
+        : []
+
+    // 计算默认展开的菜单项，去掉最后一个选中项，因为它是当前路由对应的菜单项，不需要展开
+    const routeOpenKeys = useMemo(
+        () => (selectedKeyPath.length > 1 ? selectedKeyPath.slice(0, -1) : []),
+        [selectedKeyPath]
+    )
+
+    const handleMenuClick = ({ key }: MenuClickInfo) => {
         const menuItem = findMenuItemByKey(menuList, key)
         if (!menuItem) return
         if (menuItem.router?.startsWith('http')) {
@@ -48,10 +70,13 @@ export const TreeMenu = () => {
 
     return (
         <Menu
+            key={selectedKeys.join('|') || location.pathname}
             className="h-full"
+            defaultOpenKeys={routeOpenKeys}
             id="layout-menu"
             items={menuItems}
             mode="inline"
+            selectedKeys={selectedKeys}
             theme="light"
             onClick={handleMenuClick}
         />

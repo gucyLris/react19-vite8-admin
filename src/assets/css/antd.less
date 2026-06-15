@@ -5,6 +5,76 @@
     background-color: transparent !important;
 }
 
+.layout-breadcrumb {
+    min-width: 0;
+    max-width: 100%;
+
+    .ant-breadcrumb {
+        font-size: 13px;
+        line-height: 1;
+        color: inherit;
+    }
+
+    .ant-breadcrumb ol {
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .ant-breadcrumb-separator {
+        margin-inline: 10px;
+        color: rgba(148, 163, 184, 0.8);
+    }
+}
+
+.layout-breadcrumb-light {
+    .layout-breadcrumb-link {
+        color: #64748b;
+    }
+
+    .layout-breadcrumb-link:hover {
+        color: #2563eb;
+    }
+
+    .layout-breadcrumb-current {
+        color: #0f172a;
+    }
+}
+
+.layout-breadcrumb-dark {
+    .layout-breadcrumb-link {
+        color: #94a3b8;
+    }
+
+    .layout-breadcrumb-link:hover {
+        color: #60a5fa;
+    }
+
+    .layout-breadcrumb-current {
+        color: #f8fafc;
+    }
+}
+
+.layout-breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0;
+    font: inherit;
+    white-space: nowrap;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.layout-breadcrumb-current {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 .ant-input {
     font-size: 14px !important;
 }
