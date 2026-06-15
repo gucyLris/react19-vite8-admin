@@ -79,7 +79,7 @@ const LoginPage = () => {
                         </div>
 
                         <Form
-                            className="w-[80%] text-left"
+                            className={`login-form login-form-${currentTheme} w-[80%] text-left`}
                             form={form}
                             layout="vertical"
                             name="login"

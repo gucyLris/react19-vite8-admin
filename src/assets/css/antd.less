@@ -13,6 +13,52 @@
     font-size: 12px !important;
 }
 
+.login-form-light {
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-password,
+    .ant-input-affix-wrapper input.ant-input {
+        color: #0f172a !important;
+        background-color: #ffffff !important;
+    }
+
+    .ant-input::placeholder,
+    .ant-input-affix-wrapper input.ant-input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #0f172a !important;
+        caret-color: #0f172a;
+        box-shadow: 0 0 0 1000px #ffffff inset !important;
+    }
+}
+
+.login-form-dark {
+    .ant-input,
+    .ant-input-affix-wrapper,
+    .ant-input-password,
+    .ant-input-affix-wrapper input.ant-input {
+        color: #f8fafc !important;
+        background-color: #191919 !important;
+    }
+
+    .ant-input::placeholder,
+    .ant-input-affix-wrapper input.ant-input::placeholder {
+        color: #71717a !important;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #f8fafc !important;
+        caret-color: #f8fafc;
+        box-shadow: 0 0 0 1000px #191919 inset !important;
+    }
+}
+
 // 表格滚动条样式
 .ant-table-body {
     &::-webkit-scrollbar {
