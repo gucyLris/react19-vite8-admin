@@ -1,6 +1,6 @@
 import { ConfigProvider, Layout, theme } from 'antd'
 import { memo, useMemo } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { THEME } from '@/constants/theme'
 import { useCommonStore } from '@/hooks/useCommonStore'
@@ -14,6 +14,7 @@ const { defaultAlgorithm, darkAlgorithm } = theme
 
 function LayoutPage() {
     const { Sider, Content } = Layout
+    const location = useLocation()
 
     // 从公共 store 中获取主题设置
     const {
@@ -31,6 +32,7 @@ function LayoutPage() {
         }),
         [currentTheme]
     )
+    const showNavBar = location.pathname === '/configure'
 
     return (
         <ConfigProvider theme={themeConfig}>
@@ -57,11 +59,15 @@ function LayoutPage() {
                             </div>
                         </Sider>
                         <Content className="box-border flex min-h-0 min-w-0 flex-col overflow-hidden">
-                            <div className="flex h-10 items-center justify-start px-6!">
-                                <NavBar />
-                            </div>
+                            {showNavBar ? (
+                                <div className="shrink-0 px-6! pt-0">
+                                    <NavBar />
+                                </div>
+                            ) : null}
                             <div
-                                className={`m-6! mt-0! min-h-0 flex-1 overflow-hidden rounded-md p-4! shadow-sm ${bgClass} ${textClass}`}
+                                className={`m-6! min-h-0 flex-1 overflow-hidden rounded-md p-4! shadow-sm ${
+                                    showNavBar ? 'mt-0!' : ''
+                                } ${bgClass} ${textClass}`}
                             >
                                 <Outlet /> {/* 子路由的内容会渲染在这里 */}
                             </div>

@@ -3,6 +3,7 @@ import { createBrowserRouter, redirect } from 'react-router-dom'
 import ProtectedRoute from '@/components/protectedRoute'
 import Layouts from '@/layouts'
 import { RootLayout } from '@/layouts/RootLayout'
+import { ConfigurePage } from '@/pages/configure'
 import { Dashboard } from '@/pages/dashboard'
 import { Devices } from '@/pages/devices'
 import Login from '@/pages/login'
@@ -41,6 +42,11 @@ const router = createBrowserRouter([
                                 path: 'devices',
                                 element: <Devices />,
                                 handle: { breadcrumb: '设备' }
+                            },
+                            {
+                                path: 'configure',
+                                element: <ConfigurePage />,
+                                handle: { breadcrumb: '配置' }
                             },
                             {
                                 path: 'terminal',
